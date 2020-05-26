@@ -15,7 +15,6 @@ import copy
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from util.util import downcast_dtypes
 
 
 def main():
@@ -62,8 +61,7 @@ def main():
         DataViz.plot_dataset(dataset, [col, col + '_mixture'], ['exact','exact'], ['line', 'points'])
         # This requires:
         # n_data_points * n_data_points * point_size =
-        # 31839 * 31839 * 64 bits = ~8GB available memory
-
+        # 31839 * 31839 * 32 bits = ~4GB available memory
 
         try:
             dataset = OutlierDist.simple_distance_based(dataset, [col], 'euclidean', 0.10, 0.99)

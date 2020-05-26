@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 import util.util as util
 import copy
-from util.util import downcast_dtypes
 
 # Class for outlier detection algorithms based on some distribution of the data. They
 # all consider only single points per row (i.e. one column).
@@ -73,14 +72,14 @@ class DistributionBasedOutlierDetection:
 # Class for distance based outlier detection.
 class DistanceBasedOutlierDetection:
 
-
     # Create distance table between rows in the data table. Here, only cols are considered and the specified
     # distance function is used to compute the distance.
     def distance_table(self, data_table, cols, d_function):
-        return downcast_dtypes(
-            pd.DataFrame(scipy.spatial.distance.squareform(util.distance(data_table.loc[:, cols], d_function)),
-                         columns=data_table.index, index=data_table.index)
-        )
+
+        data_table[cols] = data_table.loc[:, cols].astype('float32')
+
+        return pd.DataFrame(scipy.spatial.distance.squareform(util.distance(data_table.loc[:, cols], d_function)),
+                            columns=data_table.index, index=data_table.index).astype('float32')
 
     # The most simple distance based algorithm. We assume a distance function, e.g. 'euclidean'
     # and a minimum distance of neighboring points and frequency of occurrence.
@@ -91,14 +90,13 @@ class DistanceBasedOutlierDetection:
         new_data_table = util.normalize_dataset(data_table.dropna(axis=0, subset=cols), cols)
 
         # Create the distance table first between all instances:
-        distances = self.distance_table(new_data_table, cols, d_function)
-
+        self.distances = self.distance_table(new_data_table, cols, d_function)
 
         mask = []
         # Pass the rows in our table.
         for i in range(0, len(new_data_table.index)):
             # Check what faction of neighbors are beyond dmin.
-            frac = (float(sum([1 for col_val in distances.iloc[i,:].tolist() if col_val > dmin]))/len(new_data_table.index))
+            frac = (float(sum([1 for col_val in self.distances.iloc[i,:].tolist() if col_val > dmin]))/len(new_data_table.index))
             # Mark as an outlier if beyond the minimum frequency.
             mask.append(frac > fmin)
         data_mask = pd.DataFrame(mask, index=new_data_table.index, columns=['simple_dist_outlier'])
@@ -109,8 +107,10 @@ class DistanceBasedOutlierDetection:
     # Computes the local outlier factor. K is the number of neighboring points considered, d_function
     # the distance function again (e.g. 'euclidean').
     def local_outlier_factor(self, data_table, cols, d_function, k):
-        # Inspired on https://github.com/damjankuznar/pylof/blob/master/lof.py
+        # Inspired by https://github.com/damjankuznar/pylof/blob/master/lof.py
         # but tailored towards the distance metrics and data structures used here.
+
+        print("Calculating local outlier factor.")
 
         # Normalize the dataset first.
         new_data_table = util.normalize_dataset(data_table.dropna(axis=0, subset=cols), cols)
