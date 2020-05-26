@@ -17,9 +17,11 @@ Option 2. Install with Anaconda
 
 Using Anaconda, you can run the code in your favorite IDE and install the ML4QS requirements in a separate virtual environment. 
 
-1. Download and install the latest version of Anaconda from https://www.anaconda.com/distribution/.
-2. Create a new virtual environment using the Anaconda Navigator or the Anaconda Prompt (Windows) or terminal (MacOS/Linux). Enter `conda create --name <my_env_name>` to create a new environment, then activate it by entering `conda activate <my_env_name>`. 
+1. Download and install Anaconda 2020.02 from https://www.anaconda.com/distribution/.
+2. Create a new virtual environment using the Anaconda Navigator or the Anaconda Prompt (Windows) or terminal (MacOS/Linux). Enter `conda create --name <my_env_name> anaconda=2020.02` to create a new environment, then activate it by entering `conda activate <my_env_name>`. 
 3. Navigate to your ML4QS folder using `cd path/to/ML4QS`. 
 4. Run `pip install -r Python3_requirements.txt` to install the required dependencies. 
 
-If you have any more questions or can't seem to get the code working on your system, post your question on the Tech Support FAQ on the Canvas message board, or send me an e-mail at t.m.maaiveld@student.vu.nl.
+To get started with your coursework, download the [crowdsignals.io dataset](http://www.cs.vu.nl/~mhoogen/ml4qs/crowdsignals.zip).
+
+If you have any more questions or can't seem to get the code working on your system, post your question on the Tech Support FAQ on the Canvas message board and we will address your issue ASAP if it is not already answered there.
