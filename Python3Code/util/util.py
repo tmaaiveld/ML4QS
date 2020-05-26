@@ -3,6 +3,7 @@ import scipy
 import copy
 import math
 import numpy as np
+import pandas as pd
 
 # Not a class, just a bunch of useful functions.
 
@@ -113,3 +114,15 @@ def print_pearson_correlations(correlations):
     for i in range(0, len(correlations)):
         if np.isfinite(correlations[i][1]):
             print(correlations[i][0], ' & ', "{0:.4f}".format(correlations[i][1]), '\\\\\\hline')
+
+
+def downcast_dtypes(df, ints=True, floats=True):
+    print(df.info())
+    print(df.info(memory_usage='deep'))
+
+    if ints:
+        df_int = df.select_dtypes(include=['int'])
+        converted_int = df_int.apply(pd.to_numeric, downcast='unsigned')
+
+    if floats:
+        pass

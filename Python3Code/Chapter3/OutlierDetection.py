@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import util.util as util
 import copy
+from util.util import downcast_dtypes
 
 # Class for outlier detection algorithms based on some distribution of the data. They
 # all consider only single points per row (i.e. one column).
@@ -52,7 +53,7 @@ class DistributionBasedOutlierDetection:
     # of observing the value given the mixture model.
     def mixture_model(self, data_table, col):
 
-        print('Doing mixture models')
+        print('Applying mixture models')
         # Fit a mixture model to our data.
         data = data_table[data_table[col].notnull()][col]
         g = GaussianMixture(n_components=3, max_iter=100, n_init=1)
@@ -76,16 +77,22 @@ class DistanceBasedOutlierDetection:
     # Create distance table between rows in the data table. Here, only cols are considered and the specified
     # distance function is used to compute the distance.
     def distance_table(self, data_table, cols, d_function):
-        return pd.DataFrame(scipy.spatial.distance.squareform(util.distance(data_table.loc[:, cols], d_function)),
-                            columns=data_table.index, index=data_table.index)
+        return downcast_dtypes(
+            pd.DataFrame(scipy.spatial.distance.squareform(util.distance(data_table.loc[:, cols], d_function)),
+                         columns=data_table.index, index=data_table.index)
+        )
 
     # The most simple distance based algorithm. We assume a distance function, e.g. 'euclidean'
     # and a minimum distance of neighboring points and frequency of occurrence.
     def simple_distance_based(self, data_table, cols, d_function, dmin, fmin):
+        print('Calculating simple distance-based criterion.')
+
         # Normalize the dataset first.
         new_data_table = util.normalize_dataset(data_table.dropna(axis=0, subset=cols), cols)
+
         # Create the distance table first between all instances:
         distances = self.distance_table(new_data_table, cols, d_function)
+
 
         mask = []
         # Pass the rows in our table.
@@ -96,6 +103,7 @@ class DistanceBasedOutlierDetection:
             mask.append(frac > fmin)
         data_mask = pd.DataFrame(mask, index=new_data_table.index, columns=['simple_dist_outlier'])
         data_table = pd.concat([data_table, data_mask], axis=1)
+        del self.distances
         return data_table
 
     # Computes the local outlier factor. K is the number of neighboring points considered, d_function
@@ -116,6 +124,7 @@ class DistanceBasedOutlierDetection:
             outlier_factor.append(self.local_outlier_factor_instance(i, k))
         data_outlier_probs = pd.DataFrame(outlier_factor, index=new_data_table.index, columns=['lof'])
         data_table = pd.concat([data_table, data_outlier_probs], axis=1)
+        del self.distances
         return data_table
 
     # The distance between a row i1 and i2.
